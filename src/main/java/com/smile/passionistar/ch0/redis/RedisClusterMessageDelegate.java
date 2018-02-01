@@ -3,7 +3,7 @@ package com.smile.passionistar.ch0.redis;
 import java.io.Serializable;
 import java.util.Map;
 
-public class ChatroomMessageDelegate implements IMessageDelegate{
+public class RedisClusterMessageDelegate implements IMessageDelegate{
 
 	@Override
 	public void handleMessage(String message) {

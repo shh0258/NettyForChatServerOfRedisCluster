@@ -13,7 +13,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @ComponentScan("com.smile.passionistar.ch0.redis")
-public class ChatRoomConfig {
+public class RedisClusterConfig {
 	
 	@Bean
 	public JedisConnectionFactory redisConnectionFactory() {
@@ -39,12 +39,12 @@ public class ChatRoomConfig {
 	
 	@Bean
 	public MessageListenerAdapter delegateMessageListener() {
-		return new MessageListenerAdapter(new ChatroomMessageDelegate());
+		return new MessageListenerAdapter(new RedisClusterMessageDelegate());
 	}
 	
 	@Bean
 	public MessageListenerAdapter messageListener() {
-		return new MessageListenerAdapter(new ChatroomMessageListener());
+		return new MessageListenerAdapter(new RedisClusterMessageListener());
 	}
 	
 	@Bean
@@ -52,7 +52,7 @@ public class ChatRoomConfig {
 		RedisMessageListenerContainer redisContainer = new RedisMessageListenerContainer();
 		redisContainer.setConnectionFactory(redisConnectionFactory());
 //		redisContainer.addMessageListener(delegateMessageListener(), new ChannelTopic("chatroom.patrick"));
-		redisContainer.addMessageListener(messageListener(), new PatternTopic("c.*"));
+		redisContainer.addMessageListener(messageListener(), new PatternTopic("c.testset"));
 		return redisContainer;
 	}
 

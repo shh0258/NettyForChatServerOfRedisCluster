@@ -42,6 +42,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     static final AttributeKey<String> nickAttr = AttributeKey.newInstance("nickname");
     private WebSocketServerHandshaker handshaker;
     RoomForChannelGroup roomForChannelGroup;
+    RedisCluster redisCluster;
     
     private void hello(Channel ch, FullHttpRequest req){
     		if(nickName(ch)!= null) return;
@@ -94,7 +95,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             sendHttpResponse(ctx, req, res);
             return;
         }
-        		Pattern httpP = Pattern.compile("[/^[0-9]*$]$");//처음 오는 요청에 대해서 http를 ws로 승격시키기 위해 존
+        		Pattern httpP = Pattern.compile("[/^[0-9]*$]$");//처음 오는 요청에 대해서 http페이지를 리턴해주고, 여기서 소켓에 대한 요청이 올 것이다.이는 웹소켓으로 업그레이드 되는 기능을 가지고, 두번재 쿼리스트링에서 시작될 거다.ㅈ
         		Matcher m = httpP.matcher(req.getUri());
         		Pattern wsP = Pattern.compile("[/^[0-9]*$/websocket]");// 웹소켓 쿼리스트링을 붙여서 올때 핸드쉐이크를 추가하기 위해 존재 
         		Matcher m2 = wsP.matcher(req.getUri());
@@ -115,7 +116,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         		WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
         				getWebSocketLocation(req), null, true); // 웹소켓 팩토리에 req를 저장함 
         		handshaker = wsFactory.newHandshaker(req); // 팩토리에 새로운 핸드쉐이크를 지정해서 객체에 저장함 
-        		
         		roomForChannelGroup = new RoomForChannelGroup(ctx.channel(), req); // 룸 채널 그룹 객체에 존재하는roomValues 객체에 room 을 생성, 찾아간 후 채널 그룹에 채널을 등록 
         		Channel c = roomForChannelGroup.AddChannelGroup(); // 채널그룹에 등록한 후 리턴되는 채널의 값을 통해 핸드쉐이크를 하고 이 채널에는 핸드쉐이크가 정의된다. 그 상태로 룸객체에 들어가서 태그단위의 관리를 받는다 
         		if (handshaker == null) {
@@ -148,8 +148,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
         // Send the uppercase string back.
         String request = ((TextWebSocketFrame) frame).text();
-        System.err.printf("%s received %s%n", ctx.channel(), request); //콘솔에 전달된 값을 띄워줌 
-        roomForChannelGroup.findByChannelId(ctx.channel()).writeAndFlush(new TextWebSocketFrame(ctx.channel().attr(nickAttr).get()+": "+request));
+        System.err.printf("%s received %s%n", ctx.channel(), request); //콘솔에 전달된 값을 띄워줌 PooledUnsafeDirectByteBuf사용함 
+//        roomForChannelGroup.findByChannelId(ctx.channel()).writeAndFlush(new TextWebSocketFrame(ctx.channel().attr(nickAttr).get()+": "+request));
+//        redisCluster.redisClusterLancher(roomForChannelGroup.findByChannelIdReturnQs(ctx.channel())).convertAndSend("c."+roomForChannelGroup.findByChannelIdReturnQs(ctx.channel()), "testset123123");
+        RedisCluster redisCluster =new RedisCluster();
+        redisCluster.redisClusterLancher(roomForChannelGroup.findByChannelId(ctx.channel())).convertAndSend("c."+roomForChannelGroup.findByChannelIdReturnQs(ctx.channel()), ctx.channel().attr(nickAttr).get()+": "+request);;
+   
     }
 
     private static void sendHttpResponse(//**4
