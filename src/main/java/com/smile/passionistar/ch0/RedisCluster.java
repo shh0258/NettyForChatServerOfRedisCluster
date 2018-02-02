@@ -21,15 +21,13 @@ public class RedisCluster {
 	
 	public RedisTemplate<String, Object> redisClusterLancher(String queryString, ChannelGroup cg){
 		AbstractApplicationContext ctx = new AnnotationConfigApplicationContext(RedisClusterConfig.class);
-		System.err.println("여기까지 오나?"+ queryString +" 이 값이 들어옴 "+cg+"채널그룹 이거 받음");
-		
 		RedisClusterMessageListener redisClusterMessageListener = new RedisClusterMessageListener();
 		redisClusterMessageListener.setChannelGroup(cg);
 				
 		@SuppressWarnings("unchecked")
 		RedisTemplate<String, Object> redisTemplate = ctx.getBean("redisTemplate", RedisTemplate.class);
 		if(queryString != null) {
-			redisTemplate.convertAndSend("testset", "ms");
+			redisTemplate.convertAndSend("testset", "ms");//이 코드는 빈 파일이 업데이트 되지않는 비정상적인 동작 방식 때문에 넣었음 
 			RedisMessageListenerContainer redisContainer = ctx.getBean("redisContainer", RedisMessageListenerContainer.class);
 			MessageListenerAdapter messageListener = ctx.getBean("messageListener", MessageListenerAdapter.class);
 			redisContainer.addMessageListener(messageListener, new PatternTopic("c."+queryString));

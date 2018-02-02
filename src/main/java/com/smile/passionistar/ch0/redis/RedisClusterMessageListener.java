@@ -9,7 +9,6 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 public class RedisClusterMessageListener implements MessageListener {
 	
 	static ChannelGroup cg;
-	
 	public void setChannelGroup(ChannelGroup cg) {
 		this.cg=cg;
 	}

@@ -95,7 +95,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             sendHttpResponse(ctx, req, res);
             return;
         }
-        		Pattern httpP = Pattern.compile("[/^[0-9]*$]$");//처음 오는 요청에 대해서 http페이지를 리턴해주고, 여기서 소켓에 대한 요청이 올 것이다.이는 웹소켓으로 업그레이드 되는 기능을 가지고, 두번재 쿼리스트링에서 시작될 거다.ㅈ
+        		Pattern httpP = Pattern.compile("[/^[0-9]*$]$");//처음 오는 요청에 대해서 http페이지를 리턴해주고, 여기서 소켓에 대한 요청이 올 것이다.이는 웹소켓으로 업그레이드 되는 기능을 가지고, 두번재 쿼리스트링에서 시작될 거다.
         		Matcher m = httpP.matcher(req.getUri());
         		Pattern wsP = Pattern.compile("[/^[0-9]*$/websocket]");// 웹소켓 쿼리스트링을 붙여서 올때 핸드쉐이크를 추가하기 위해 존재 
         		Matcher m2 = wsP.matcher(req.getUri());
@@ -152,7 +152,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 //        roomForChannelGroup.findByChannelId(ctx.channel()).writeAndFlush(new TextWebSocketFrame(ctx.channel().attr(nickAttr).get()+": "+request));
 //        redisCluster.redisClusterLancher(roomForChannelGroup.findByChannelIdReturnQs(ctx.channel())).convertAndSend("c."+roomForChannelGroup.findByChannelIdReturnQs(ctx.channel()), "testset123123");
         RedisCluster redisCluster =new RedisCluster();
-        redisCluster.redisClusterLancher(roomForChannelGroup.findByChannelId(ctx.channel())).convertAndSend("c."+roomForChannelGroup.findByChannelIdReturnQs(ctx.channel()), ctx.channel().attr(nickAttr).get()+": "+request);;
+        redisCluster.redisClusterLancher(roomForChannelGroup.findByChannelId(ctx.channel())).convertAndSend("c."+roomForChannelGroup.findByChannelIdReturnQs(ctx.channel()), ctx.channel().attr(nickAttr).get()+": "+request);
    
     }
 
