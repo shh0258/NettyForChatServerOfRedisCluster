@@ -78,13 +78,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
-        // Handle a bad request.
         if (!req.getDecoderResult().isSuccess()) { // httprequest 를 디코딩한 결과가 없을때 
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
             return;
         }
 
-        // Allow only GET methods.
         if (req.getMethod() != GET) { // get 형식이 아닐 때 
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
             return;
@@ -100,7 +98,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         		Pattern wsP = Pattern.compile("[/^[0-9]*$/websocket]");// 웹소켓 쿼리스트링을 붙여서 올때 핸드쉐이크를 추가하기 위해 존재 
         		Matcher m2 = wsP.matcher(req.getUri());
         		
-        if (m.find()) { // 이 요청일 때, 실제 역활 수행 **3
+        if (m.find()) { // 이 요청일 때, http 뷰페이지 리턴해주기, 서버와 연결 시 필요없는 부분  **3
             ByteBuf content = WebSocketServerIndexPage.getContent(getWebSocketLocation(req));
             FullHttpResponse res = new DefaultFullHttpResponse(HTTP_1_1, OK, content); // ws로 설정된 주소를 인자로 받아서 페이지 전체를 bytebuf에 담아준다 
 
@@ -149,11 +147,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         // Send the uppercase string back.
         String request = ((TextWebSocketFrame) frame).text();
         System.err.printf("%s received %s%n", ctx.channel(), request); //콘솔에 전달된 값을 띄워줌 PooledUnsafeDirectByteBuf사용함 
+//        JsonParser jsonps = new JsonParser();
+//        request =jsonps.jsonParsingForText(request);
 //        roomForChannelGroup.findByChannelId(ctx.channel()).writeAndFlush(new TextWebSocketFrame(ctx.channel().attr(nickAttr).get()+": "+request));
 //        redisCluster.redisClusterLancher(roomForChannelGroup.findByChannelIdReturnQs(ctx.channel())).convertAndSend("c."+roomForChannelGroup.findByChannelIdReturnQs(ctx.channel()), "testset123123");
         RedisCluster redisCluster =new RedisCluster();
         redisCluster.redisClusterLancher(roomForChannelGroup.findByChannelId(ctx.channel())).convertAndSend("c."+roomForChannelGroup.findByChannelIdReturnQs(ctx.channel()), ctx.channel().attr(nickAttr).get()+": "+request);
-   
     }
 
     private static void sendHttpResponse(//**4
@@ -179,7 +178,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         ctx.close();
     }
 
-    private static String getWebSocketLocation(FullHttpRequest req) {
+    private static String getWebSocketLocation(FullHttpRequest req) { // chat manage 서버와 의견조율 시에 없어질 수 있는 메서드
         String location =  req.headers().get(HOST)+ req.getUri() + WEBSOCKET_PATH;
         if (WebSocketServer.SSL) { //ssl인증키방식 일때 
             return "wss://" + location;
