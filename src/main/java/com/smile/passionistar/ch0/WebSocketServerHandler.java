@@ -41,7 +41,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     private static final String WEBSOCKET_PATH = "/websocket";
     static final AttributeKey<String> nickAttr = AttributeKey.newInstance("nickname");
     private WebSocketServerHandshaker handshaker;
-    RoomForChannelGroup roomForChannelGroup;
+    RoomForChannelGroup2 roomForChannelGroup;
     RedisCluster redisCluster;
     
     private void hello(Channel ch, FullHttpRequest req){
@@ -66,7 +66,10 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         if (msg instanceof FullHttpRequest) {
         		hello(ctx.channel(), (FullHttpRequest) msg); //ctx.channel 과 roomBalancing.addchannelgroup()에서나온 채널은 같은 값으로 확인   
         		handleHttpRequest(ctx, (FullHttpRequest) msg); //http 요청일 때,**2 
-            
+        		
+        		roomForChannelGroup= new RoomForChannelGroup2();
+        		RedisForLB rflc = new RedisForLB(roomForChannelGroup.gabageCollectForRoomMap());
+    		    rflc.sendCount();//redis 서버에 lb를 위한 chatserver의 접속자수를 업데이트 , 이 스케줄링은 서버에 대한 헬스체크가 올때만 실행된다. 헬스체크는 http 형식으로 1초마다 보내기로 chat manage server와 약속되어있다.
         } else if (msg instanceof WebSocketFrame) {//$$2
             handleWebSocketFrame(ctx, (WebSocketFrame) msg); // websocket 요청일 때 
         }
@@ -114,7 +117,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         		WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
         				getWebSocketLocation(req), null, true); // 웹소켓 팩토리에 req를 저장함 
         		handshaker = wsFactory.newHandshaker(req); // 팩토리에 새로운 핸드쉐이크를 지정해서 객체에 저장함 
-        		roomForChannelGroup = new RoomForChannelGroup(ctx.channel(), req); // 룸 채널 그룹 객체에 존재하는roomValues 객체에 room 을 생성, 찾아간 후 채널 그룹에 채널을 등록 
+        		roomForChannelGroup = new RoomForChannelGroup2(ctx.channel(), req); // 룸 채널 그룹 객체에 존재하는roomValues 객체에 room 을 생성, 찾아간 후 채널 그룹에 채널을 등록 
         		Channel c = roomForChannelGroup.AddChannelGroup(); // 채널그룹에 등록한 후 리턴되는 채널의 값을 통해 핸드쉐이크를 하고 이 채널에는 핸드쉐이크가 정의된다. 그 상태로 룸객체에 들어가서 태그단위의 관리를 받는다 
         		if (handshaker == null) {
         			WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(c);
@@ -130,7 +133,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         // Check for closing frame
         if (frame instanceof CloseWebSocketFrame) { // 소켓을 종료했을 때 날아오는 프레임을 체크 
             handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-            System.out.println("CLosesocket");
+            System.out.println("CLosesocket");// 이 단에서 lb를 위한 redis 데이터 업데이트가 이루어 져야함 
+            roomForChannelGroup.findByChannelIdReturnRoom(ctx.channel()).count--; // room의 갯수를 주기적으로 줄이기 위해 카운트를 세어줌
             return;
         }
         if (frame instanceof PingWebSocketFrame) { // ping 형식이 왔을 때 pong 쏘기 예제 
@@ -147,7 +151,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         // Send the uppercase string back.
         String request = ((TextWebSocketFrame) frame).text();
         System.err.printf("%s received %s%n", ctx.channel(), request); //콘솔에 전달된 값을 띄워줌 PooledUnsafeDirectByteBuf사용함 
-//        JsonParser jsonps = new JsonParser();
+//        JsonParser jsonps = new JsonParser(); // json 데이터형을 사용할 일이 있을 때 사용할 계획 
 //        request =jsonps.jsonParsingForText(request);
 //        roomForChannelGroup.findByChannelId(ctx.channel()).writeAndFlush(new TextWebSocketFrame(ctx.channel().attr(nickAttr).get()+": "+request));
 //        redisCluster.redisClusterLancher(roomForChannelGroup.findByChannelIdReturnQs(ctx.channel())).convertAndSend("c."+roomForChannelGroup.findByChannelIdReturnQs(ctx.channel()), "testset123123");

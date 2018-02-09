@@ -17,6 +17,8 @@ package com.smile.passionistar.ch0.spring;
 
 import org.springframework.stereotype.Component;
 
+import com.smile.passionistar.ch0.RedisForLB;
+import com.smile.passionistar.ch0.RoomForChannelGroup2;
 import com.smile.passionistar.ch0.WebSocketServerInitializer;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -34,7 +36,7 @@ public final class WebSocketServerV2 {
 
     static final boolean SSL = System.getProperty("ssl") != null; //ssl 정보 입력 
     static final int PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080")); //포트번호 지정  ssl 아니면 8443
-
+    
     public void start() throws Exception {
         // Configure SSL.
         final SslContext sslCtx;
@@ -57,8 +59,7 @@ public final class WebSocketServerV2 {
             Channel ch = b.bind(PORT).sync().channel();
 
             System.out.println("Open your web browser and navigate to " +
-                    (SSL? "https" : "http") + "://127.0.0.1:" + PORT + '/');// 접속위치 콘솔에 알리기 테스트용
-            
+                    (SSL? "https" : "http") + "://127.0.0.1:" + PORT + '/');// 접속위치 콘솔에 알리기 테스트용    
 
             ch.closeFuture().sync();
         } finally {
