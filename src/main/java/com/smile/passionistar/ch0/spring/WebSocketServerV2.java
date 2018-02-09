@@ -16,9 +16,6 @@
 package com.smile.passionistar.ch0.spring;
 
 import org.springframework.stereotype.Component;
-
-import com.smile.passionistar.ch0.RedisForLB;
-import com.smile.passionistar.ch0.RoomForChannelGroup2;
 import com.smile.passionistar.ch0.WebSocketServerInitializer;
 
 import io.netty.bootstrap.ServerBootstrap;

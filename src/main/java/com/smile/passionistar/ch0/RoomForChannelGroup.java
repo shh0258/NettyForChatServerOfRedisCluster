@@ -1,9 +1,6 @@
 package com.smile.passionistar.ch0;
 
 import java.util.HashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
@@ -12,22 +9,22 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-public class RoomForChannelGroup2 {// 해시형태 룸관리 
+public class RoomForChannelGroup {// 해시형태 룸관리 
 	RedisCluster redisCluster = new RedisCluster();
 
-    public static HashMap<String, Room> roomMap = new HashMap<String, Room>();
-    public static HashMap<ChannelId, String> channelQs = new HashMap<ChannelId, String>();
+    public static HashMap<String, Room> roomMap = new HashMap<String, Room>();//쿼리스트링과 룸을 받음 
+    public static HashMap<ChannelId, String> channelQs = new HashMap<ChannelId, String>();// 채널아이디와 쿼리스트링을 받음 
     public static int userCount=0;
     
     
 	Channel ch;
 	FullHttpRequest req; // 쿼리스트링 얻기 위해 받아옴 
 	
-	public RoomForChannelGroup2() {
+	public RoomForChannelGroup() {
 		
 	}
 	
-	public RoomForChannelGroup2(Channel ch, FullHttpRequest req) {
+	public RoomForChannelGroup(Channel ch, FullHttpRequest req) {
 		this.ch = ch;
 		this.req =req;
 	}
@@ -40,6 +37,7 @@ public class RoomForChannelGroup2 {// 해시형태 룸관리
 			Room room = new Room(new DefaultChannelGroup(GlobalEventExecutor.INSTANCE), req.getUri()); // 쿼리스트링 값에 해당하는 룸객체를 생성 
 			room.cg.add(ch); //룸에 새로운 채널그룹을 생
 			room.count++;
+			userCount++;
 			roomMap.put(req.getUri(), room);
 			rtemp = room;
 			redisCluster.redisClusterLancher(req.getUri(), room.cg);// 레디스 채널에 등록 
@@ -50,6 +48,7 @@ public class RoomForChannelGroup2 {// 해시형태 룸관리
 		if(roomMap.containsKey(req.getUri())) {//이미 존재하는 room 인 경우 
 			roomMap.get(req.getUri()).cg.add(ch);
 			roomMap.get(req.getUri()).count++;
+			userCount++;
 			rtemp=roomMap.get(req.getUri());
 			if(!channelQs.containsKey(ch.id())) {
 				channelQs.put(ch.id(), req.getUri());
@@ -60,6 +59,7 @@ public class RoomForChannelGroup2 {// 해시형태 룸관리
 			Room room = new Room(new DefaultChannelGroup(GlobalEventExecutor.INSTANCE), req.getUri()); // 쿼리스트링 값에 해당하는 룸객체를 생성 
 			room.cg.add(ch); //룸에 새로운 채널그룹을 생
 			room.count++;
+			userCount++;
 			roomMap.put(req.getUri(), room);
 			rtemp = room;// 룸객체가 실제로 생성되었다면, 리턴하기 위햇 사용해
 			redisCluster.redisClusterLancher(req.getUri(), room.cg);//redis cluster에 새로운 채널그룹을 넣고 이를 등록해서 다음번에 문자를 보낼 시에 사용할 수 있게 셋팅함
@@ -101,7 +101,7 @@ public class RoomForChannelGroup2 {// 해시형태 룸관리
 		return channelQs.get(c.id());
 	}
 	
-	public int gabageCollectForRoomMap() {//hash 카운트가 0일 경우 쓰이지 않는 해쉬테이블 이므로 삭제한다.
+	public static void gabageCollectForRoomMap() {//hash 카운트가 0일 경우 쓰이지 않는 해쉬테이블 이므로 삭제한다.
 		int userCount=0;
 		
 		if(!roomMap.isEmpty()) {
@@ -112,7 +112,5 @@ public class RoomForChannelGroup2 {// 해시형태 룸관리
 				}
 			}
 		}
-		
-		return userCount;
 	}
 }
