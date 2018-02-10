@@ -15,8 +15,14 @@
  */
 package com.smile.passionistar.ch0.spring;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.stereotype.Component;
+
 import com.smile.passionistar.ch0.WebSocketServerInitializer;
+import com.smile.passionistar.ch0.util.RoomForChannelGroup;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -55,10 +61,22 @@ public final class WebSocketServerV2 {
 
             Channel ch = b.bind(PORT).sync().channel();
 
-            System.out.println("Open your web browser and navigate to " +
+            System.out.println("Boot bt Spring, Open your web browser and navigate to " +
                     (SSL? "https" : "http") + "://127.0.0.1:" + PORT + '/');// 접속위치 콘솔에 알리기 테스트용    
 
+//            Runnable runnable = new Runnable() {
+//
+//				@Override
+//				public void run() {
+//					RoomForChannelGroup.gabageCollectForRoomMap();
+//				}
+//            };
+//            ScheduledExecutorService service = Executors
+//            		.newSingleThreadScheduledExecutor();
+//            service.scheduleAtFixedRate(runnable, 36000, 36000, TimeUnit.SECONDS);
+            //가비지 컬렉팅 하기위한 타이머메서드, 이는 room 객체에 채팅내용을 저장할 경우가생길 때, 잠시동안은 채팅방을 유지하기 위해서 필요한 내용이다.
             ch.closeFuture().sync();
+            
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
