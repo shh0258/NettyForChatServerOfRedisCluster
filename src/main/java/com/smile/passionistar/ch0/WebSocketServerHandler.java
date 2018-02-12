@@ -64,10 +64,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         if (msg instanceof FullHttpRequest) {
         		hello(ctx.channel(), (FullHttpRequest) msg); //ctx.channel 과 roomBalancing.addchannelgroup()에서나온 채널은 같은 값으로 확인   
         		handleHttpRequest(ctx, (FullHttpRequest) msg); //http 요청일 때,**2 
-        		
-        		roomForChannelGroup= new RoomForChannelGroup();
-        		RedisForLB rflc = new RedisForLB(RoomForChannelGroup.userCount);
-    		    rflc.sendCount();//redis 서버에 lb를 위한 chatserver의 접속자수를 업데이트 , 이 스케줄링은 서버에 대한 헬스체크가 올때만 실행된다. 헬스체크는 http 형식으로 1초마다 보내기로 chat manage server와 약속되어있다.
         } else if (msg instanceof WebSocketFrame) {//$$2
             handleWebSocketFrame(ctx, (WebSocketFrame) msg); // websocketframe 요청일 때  
         }
