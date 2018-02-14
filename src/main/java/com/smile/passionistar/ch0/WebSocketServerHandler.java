@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 
 import com.smile.passionistar.ch0.util.RandomNickname;
 import com.smile.passionistar.ch0.util.RedisCluster;
-import com.smile.passionistar.ch0.util.RedisForLB;
 import com.smile.passionistar.ch0.util.RoomForChannelGroup;
 
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
