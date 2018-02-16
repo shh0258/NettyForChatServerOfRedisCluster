@@ -16,7 +16,7 @@ public class ThreadForRedis {
         };
         ScheduledExecutorService service = Executors
         		.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(runnable, 10, 1, TimeUnit.SECONDS); //10초 뒤에 5초 간격으로 실행됨 
+        service.scheduleAtFixedRate(runnable, 10, 5, TimeUnit.SECONDS); //10초 뒤에 5초 간격으로 실행됨 
         //타이머메서드
         
         Runnable runnable2 = new Runnable() {

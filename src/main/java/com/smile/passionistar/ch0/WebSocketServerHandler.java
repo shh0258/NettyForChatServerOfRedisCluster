@@ -156,7 +156,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
         // 200이 아니면 에러페이지 제너레이트함
         if (res.getStatus().code() != 200) { //200이 아니라면 에러를 위한 새로운 버퍼와 내용 전달 
-            ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);//풀없는 버퍼에 상태내용과 설정을 담고 
+            ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);//풀에 존재하지 않는 버퍼에 상태내용과 설정을 담고 
             res.content().writeBytes(buf);//그 내용을 httpcontent 에 담는다.
             buf.release();// buf 객체의 count 를 하나 늘리
             HttpHeaders.setContentLength(res, res.content().readableBytes()); //res의content내용의 길이를 위에 넣어준 대로 헤더에 표시설정 
