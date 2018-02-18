@@ -54,9 +54,9 @@ public final class WebSocketServerV2 {
              .childHandler(new WebSocketServerInitializer(sslCtx)); //클라이언트 소켓 채널 측에 ssl 에 관련된 핸들러를 등록한다.
 
             Channel ch = b.bind(PORT).sync().channel();
-
+            
             System.out.println("Boot bt Spring, Open your web browser and navigate to " +
-                    (SSL? "https" : "http") + "://127.0.0.1:" + PORT + '/');// 접속위치 콘솔에 알리기 테스트용    
+                    (SSL? "https" : "http") + "://127.0.0.1:" + PORT + '/');// 접속위치 콘솔에 알리기 테스트용 
 
             ThreadForRedis.threadRunForRedis();// 레디스 데이터 데이트용 lb와 popularchat의 업데이트를 초, 시간단위로 독립적 스레드로 돌린다 
             ch.closeFuture().sync();
