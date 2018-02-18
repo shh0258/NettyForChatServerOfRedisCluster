@@ -33,6 +33,10 @@
 	    <version>2.1.0</version>
 	</dependency>
  </dependencies>
+ 	<properties>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
+	</properties>
   
   
 <!--   <build>
